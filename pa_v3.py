@@ -43,14 +43,23 @@ pa_label = np.ones(len(pa_data))
 all_data = np.concatenate([hl_data, pa_data], axis=0)
 all_label = np.concatenate([hl_label, pa_label], axis=0)
 
+all_norm = np.zeros_like(all_data)
+
+for i in range(all_data.shape[0]):
+    mean_i = np.mean(all_data[i,:])
+    std_i = np.std(all_data[i,:])
+    
+    i_d = (all_data[i,:] - mean_i)/ std_i
+    all_norm[i,:] = i_d
+
 ## all_data normalize
-all_mean = np.mean(all_data)
-all_std = np.std(all_data)
-all_data = (all_data -all_mean)/all_std
+#all_mean = np.mean(all_data)
+#all_std = np.std(all_data)
+#all_data = (all_data -all_mean)/all_std
+#
+#all_data = all_data[..., np.newaxis]
 
-all_data = all_data[..., np.newaxis]
-
-X_train, X_test, y_train, y_test = train_test_split(all_data, all_label,\
+X_train, X_test, y_train, y_test = train_test_split(all_norm, all_label,\
                                                     test_size=0.4, random_state=142)
 
 y_train=np_utils.to_categorical(y_train)
