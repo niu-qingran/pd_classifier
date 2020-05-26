@@ -25,7 +25,8 @@ from keras.callbacks import ModelCheckpoint, TensorBoard
 
 import os
 
-
+## val 0.852, test 0.874
+## possion loss, weight decay 1e-4
 log_dir = './model/'
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
@@ -43,24 +44,29 @@ pa_label = np.ones(len(pa_data))
 all_data = np.concatenate([hl_data, pa_data], axis=0)
 all_label = np.concatenate([hl_label, pa_label], axis=0)
 
-all_norm = np.zeros_like(all_data)
-
-for i in range(all_data.shape[0]):
-    mean_i = np.mean(all_data[i,:])
-    std_i = np.std(all_data[i,:])
-    
-    i_d = (all_data[i,:] - mean_i)/ std_i
-    all_norm[i,:] = i_d
-
 ## all_data normalize
-#all_mean = np.mean(all_data)
-#all_std = np.std(all_data)
-#all_data = (all_data -all_mean)/all_std
-#
-#all_data = all_data[..., np.newaxis]
+all_mean = np.mean(all_data)
+all_std = np.std(all_data)
+all_data = (all_data -all_mean)/all_std
 
-X_train, X_test, y_train, y_test = train_test_split(all_norm, all_label,\
-                                                    test_size=0.4, random_state=142)
+num, step = all_data.shape
+#for i in range(num):
+#    mean_i = np.mean(all_data[i, :])
+#    std_i = np.std(all_data[i, :])
+#    
+#    if std_i > 5e-2:
+#        all_data[i, :] = (all_data[i, :] - mean_i)/std_i
+#    print('*********std  :',mean_i)
+    
+#max_all = np.max(all_data)    
+#min_all = np.min(all_data)
+#all_data = (all_data - min_all)/(max_all - min_all)
+    
+print(np.max(all_data))
+all_data = all_data[..., np.newaxis]
+
+X_train, X_test, y_train, y_test = train_test_split(all_data, all_label,\
+                                                    test_size=0.4, random_state=20)
 
 y_train=np_utils.to_categorical(y_train)
 y_test = np_utils.to_categorical(y_test)
@@ -85,11 +91,11 @@ STRIDE_SIZE=2 #卷积步长
 
 time_step = 600
 
-EPOCH_NUM = 150
+EPOCH_NUM = 250
 
 
 ##====================1====================
-rmp = optimizers.RMSprop(lr=5e-4, rho=0.9, epsilon=1e-08, decay=0.0)
+rmp = optimizers.RMSprop(lr=5e-4, rho=0.9, epsilon=1e-08, decay=1e-4)
 #rmp = optimizers.Adam(learning_rate=5e-4)
 
 model = Sequential()
@@ -102,6 +108,7 @@ model.add(Conv1D(filters=NUM_FILTERS, kernel_size=FILTER_SIZE,strides=STRIDE_SIZ
                  name='Conv1D_3'))
 #model.add(Conv1D(filters=NUM_FILTERS, kernel_size=FILTER_SIZE, strides=STRIDE_SIZE, activation='relu', kernel_initializer='orthogonal',
 #                 name='Conv1D_4'))
+
 model.add(LSTM(NUM_UNITS_LSTM, return_sequences=True, 
                name='LSTM_1'))
 model.add(LSTM(NUM_UNITS_LSTM, return_sequences=True, 
@@ -111,7 +118,11 @@ model.add(Dropout(0.8, name='dropout'))
 model.add(Dense(NUM_CLASSES, activation='softmax', 
                 name='Output'))
 
-model.compile(loss='categorical_crossentropy', optimizer=rmp, metrics=['accuracy'])
+#model.compile(loss='categorical_crossentropy', optimizer=rmp, metrics=['accuracy'])
+
+model.compile(loss='poisson', \
+              optimizer=rmp, metrics=['accuracy'])
+
 
 print(model.summary())
 

@@ -71,12 +71,12 @@ NUM_CLASSES = 2       #类别数
 BATCH_SIZE = 16
 NUM_FILTERS = 64
 FILTER_SIZE = 3
-NUM_UNITS_LSTM = 128
+NUM_UNITS_LSTM = 64
 STRIDE_SIZE=2 #卷积步长
 
 time_step = 600
 
-EPOCH_NUM = 150
+EPOCH_NUM = 250
 
 
 ##====================1====================
@@ -91,8 +91,9 @@ model.add(Conv1D(filters=NUM_FILTERS, kernel_size=FILTER_SIZE,strides=STRIDE_SIZ
                  name='Conv1D_2'))
 model.add(Conv1D(filters=NUM_FILTERS, kernel_size=FILTER_SIZE,strides=STRIDE_SIZE, activation='relu', 
                  name='Conv1D_3'))
-#model.add(Conv1D(filters=NUM_FILTERS, kernel_size=FILTER_SIZE, strides=STRIDE_SIZE, activation='relu', kernel_initializer='orthogonal',
-#                 name='Conv1D_4'))
+model.add(Conv1D(filters=NUM_FILTERS, kernel_size=FILTER_SIZE, strides=STRIDE_SIZE, activation='relu', kernel_initializer='orthogonal',
+                 name='Conv1D_4'))
+
 model.add(LSTM(NUM_UNITS_LSTM, return_sequences=True, 
                name='LSTM_1'))
 model.add(LSTM(NUM_UNITS_LSTM, return_sequences=True, 

@@ -25,8 +25,6 @@ from keras.callbacks import ModelCheckpoint, TensorBoard
 
 import os
 
-## 0.834 best test score
-## tensroflow==1.14, keras==5.1
 
 log_dir = './model/'
 if not os.path.exists(log_dir):
@@ -50,6 +48,20 @@ all_mean = np.mean(all_data)
 all_std = np.std(all_data)
 all_data = (all_data -all_mean)/all_std
 
+num, step = all_data.shape
+#for i in range(num):
+#    mean_i = np.mean(all_data[i, :])
+#    std_i = np.std(all_data[i, :])
+#    
+#    if std_i > 5e-2:
+#        all_data[i, :] = (all_data[i, :] - mean_i)/std_i
+#    print('*********std  :',mean_i)
+    
+#max_all = np.max(all_data)    
+#min_all = np.min(all_data)
+#all_data = (all_data - min_all)/(max_all - min_all)
+    
+print(np.max(all_data))
 all_data = all_data[..., np.newaxis]
 
 X_train, X_test, y_train, y_test = train_test_split(all_data, all_label,\
@@ -86,17 +98,19 @@ rmp = optimizers.RMSprop(lr=5e-4, rho=0.9, epsilon=1e-08, decay=0.0)
 #rmp = optimizers.Adam(learning_rate=5e-4)
 
 model = Sequential()
-model.add(Conv1D(filters=NUM_FILTERS, kernel_size=FILTER_SIZE, strides=STRIDE_SIZE,activation='relu',
-                 input_shape=(time_step, NB_SENSOR_CHANNELS), 
-                 name='Conv1D_1'))
-model.add(Conv1D(filters=NUM_FILTERS, kernel_size=FILTER_SIZE,strides=STRIDE_SIZE, activation='relu', 
-                 name='Conv1D_2'))
-model.add(Conv1D(filters=NUM_FILTERS, kernel_size=FILTER_SIZE,strides=STRIDE_SIZE, activation='relu', 
-                 name='Conv1D_3'))
+#model.add(Conv1D(filters=NUM_FILTERS, kernel_size=FILTER_SIZE, strides=STRIDE_SIZE,activation='relu',
+#                 input_shape=(time_step, NB_SENSOR_CHANNELS), 
+#                 name='Conv1D_1'))
+#model.add(Conv1D(filters=NUM_FILTERS, kernel_size=FILTER_SIZE,strides=STRIDE_SIZE, activation='relu', 
+#                 name='Conv1D_2'))
+#model.add(Conv1D(filters=NUM_FILTERS, kernel_size=FILTER_SIZE,strides=STRIDE_SIZE, activation='relu', 
+#                 name='Conv1D_3'))
 #model.add(Conv1D(filters=NUM_FILTERS, kernel_size=FILTER_SIZE, strides=STRIDE_SIZE, activation='relu', kernel_initializer='orthogonal',
 #                 name='Conv1D_4'))
+
 model.add(LSTM(NUM_UNITS_LSTM, return_sequences=True, 
-               name='LSTM_1'))
+               name='LSTM_1', input_shape=(time_step, NB_SENSOR_CHANNELS)))
+
 model.add(LSTM(NUM_UNITS_LSTM, return_sequences=True, 
                name='LSTM_2'))
 model.add(Flatten(name='Flatten'))
@@ -104,7 +118,11 @@ model.add(Dropout(0.8, name='dropout'))
 model.add(Dense(NUM_CLASSES, activation='softmax', 
                 name='Output'))
 
-model.compile(loss='categorical_crossentropy', optimizer=rmp, metrics=['accuracy'])
+#model.compile(loss='categorical_crossentropy', optimizer=rmp, metrics=['accuracy'])
+
+model.compile(loss='mean_squared_error', \
+              optimizer=rmp, metrics=['accuracy'])
+
 
 print(model.summary())
 
