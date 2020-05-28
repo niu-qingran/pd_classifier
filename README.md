@@ -3,7 +3,6 @@
 
 ### 可穿戴设备介绍
 手腕、左脚、右脚的传感器：加速度计+陀螺仪
-
 ![Device](https://github.com/leigaoyi/pd_classifier/blob/master/device.PNG)
 
 ### 加速度计数据步态识别实验
@@ -24,7 +23,22 @@
 步态辨识实验。数据文件存储在data中，分别是health.npy、pd.npy。模型文件在pa_model中，pa_v2和pa_v3是调试参数的文件，其中
 最佳的实验结果保存在pa_v3中。
 
-###实验记录
+### 实验记录
+RMSprop优化器
 
+1)三层一维卷积，无优化器权重衰减，学习率 5e-4
+
+损失函数
+
+Cos   0.8598(val)   0.79(test)
+
+logcosh  0.88(val)  0.8296(test)
+
+KL diverge  0.85185  0.7704
+
+2) 3 1Dconv,权重衰减1e-2，学习率5e-4
+binary corss  0.8693  0.800
+
+Possion  0.8519   0.8714(best)
 
 
